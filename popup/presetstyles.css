@@ -1,0 +1,203 @@
+/* popup/styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    padding: 10px;
+    width: 300px;
+}
+
+/* wildcard.html 전용 스타일 */
+body.wildcard-body {
+    width: 60%;
+    margin: 20px auto;
+    max-width: 1000px;
+    min-width: 600px;
+    background-color: #f7f7f7;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    text-align: center;
+    font-size: 25px;
+}
+
+label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.informtext {
+    font-weight: bold;
+    width: 120px; /* 레이블 너비 조정 */
+}
+
+button {
+    padding: 5px 10px;
+    margin-top: 10px;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 14px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+button:disabled {
+    background-color: #e0e0e0;
+    cursor: not-allowed;
+}
+
+/* 기본 테이블 스타일 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    font-size: 14px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+th, td {
+    border: 1px solid #e0e0e0;
+    padding: 10px 15px;
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+th {
+    background-color: #f9f9f9;
+    font-weight: bold;
+    text-align: center;
+}
+
+td {
+    word-break: break-word;
+}
+
+table td.key {
+    width: 20%; /* Key 열 너비 */
+    font-weight: bold;
+    text-align: center;
+    color: #333333;
+}
+
+table td.value {
+    width: 60%; /* Value 열 너비 */
+    text-align: left;
+}
+
+table td.actions {
+    width: 15%; /* Action 열 너비 */
+    text-align: center;
+    white-space: nowrap;
+}
+
+.dropdown {
+    width: 100%;
+    padding: 5px;
+    font-size: 14px;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto; /* 10% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 50%; /* Could be more or less, depending on screen size */
+    border-radius: 5px;
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+textarea {
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+    resize: vertical; /* 사용자가 세로 크기를 조정 가능 */
+}
+#modalCharPromptsContainer label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* textarea와 버튼 간 여백 확보 */
+    margin-bottom: 10px;
+}
+
+#modalCharPromptsContainer textarea {
+    flex-grow: 1; /* textarea가 가능한 공간을 차지 */
+    margin-left: 13px;
+    margin-right: 15px; /* 버튼과 간격 */
+    resize: vertical; /* 사용자가 크기 조절 가능 */
+}
+
+#modalCharPromptsContainer button {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-bottom: 15px;
+    transition: background-color 0.3s;
+    min-width: 70px; /* 버튼의 최소 가로 길이 */
+    height: 40px; /* 고정 높이 */
+    line-height: 30px; /* 텍스트를 중앙으로 정렬 */
+    text-align: center; /* 텍스트 정렬 */
+    white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+}
+
+#modalCharPromptsContainer button:hover {
+    background-color: #d32f2f;
+}
+
+#presetMainButtonContainer {
+    display: flex;
+    justify-content: flex-end; /* 버튼 오른쪽 정렬 */
+    gap: 10px; /* 버튼 간 간격 */
+    margin-top: 10px; /* 버튼 위 여백 */
+}

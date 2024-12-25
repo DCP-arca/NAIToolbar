@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>EXIF Info Popup</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 0;
+        padding: 16px;
+      }
+      h1 {
+        font-size: 18px;
+        margin-top: 0;
+      }
+      .section {
+        margin-bottom: 16px;
+        padding: 8px;
+        border: 1px solid #ccc;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 8px;
+      }
+      th, td {
+        border: 1px solid #ccc;
+        padding: 4px 8px;
+      }
+      .raw-data-area {
+        width: 100%;
+        height: 200px;
+      }
+      label {
+        display: block;
+        margin-bottom: 4px;
+      }
+      input[type="text"] {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>EXIF 정보</h1>
+
+    <!-- prompt -->
+    <div class="section" id="prompt-section">
+      <h2>Prompt</h2>
+      <textarea id="promptValue" rows="4" readonly style="width:100%;"></textarea>
+    </div>
+    <div class="section" id="nprompt-section">
+      <h2>Negative Prompt</h2>
+      <textarea id="ucValue" rows="4" readonly style="width:100%;"></textarea>
+    </div>
+
+    <!-- steps, height, width, scale, seed... -->
+    <div class="section">
+      <label>Steps: <input type="text" id="stepsValue" readonly /></label>
+      <label>Height: <input type="text" id="heightValue" readonly /></label>
+      <label>Width: <input type="text" id="widthValue" readonly /></label>
+      <label>Scale: <input type="text" id="scaleValue" readonly /></label>
+      <label>Seed: <input type="text" id="seedValue" readonly /></label>
+      <label>Noise Schedule: <input type="text" id="noiseScheduleValue" readonly /></label>
+      <label>Sampler: <input type="text" id="samplerValue" readonly /></label>
+      <label>SM: <input type="text" id="smValue" readonly /></label>
+      <label>SM_DYN: <input type="text" id="smDynValue" readonly /></label>
+    </div>
+
+    <!-- v4_prompt -->
+    <div class="section" id="v4PromptSection" style="display:none;">
+      <h2>v4_prompt</h2>
+      <div>
+        <label>base_caption:
+          <textarea id="v4BaseCaption" rows="4" readonly style="width:100%;"></textarea>
+        </label>
+      </div>
+      <div>
+        <label>use_coords:
+          <input type="text" id="v4UseCoords" readonly />
+        </label>
+      </div>
+      <div>
+        <label>use_order:
+          <input type="text" id="v4UseOrder" readonly />
+        </label>
+      </div>
+
+      <!-- char_captions 테이블 -->
+      <h3>char_captions</h3>
+      <table id="v4CharCaptionsTable">
+        <thead>
+          <tr>
+            <th>char_caption</th>
+            <th>centers</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- v4_negative_prompt -->
+    <div class="section" id="v4NegativePromptSection" style="display:none;">
+      <h2>v4_negative_prompt</h2>
+      <div>
+        <label>base_caption:
+          <textarea id="v4NegBaseCaption" rows="4" readonly style="width:100%;"></textarea>
+        </label>
+      </div>
+      <div>
+        <label>use_coords:
+          <input type="text" id="v4NegUseCoords" readonly />
+        </label>
+      </div>
+      <div>
+        <label>use_order:
+          <input type="text" id="v4NegUseOrder" readonly />
+        </label>
+      </div>
+
+      <!-- char_captions 테이블 -->
+      <h3>char_captions</h3>
+      <table id="v4NegCharCaptionsTable">
+        <thead>
+          <tr>
+            <th>char_caption</th>
+            <th>centers</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- reference_information_extracted_multiple, reference_strength_multiple -->
+    <div class="section">
+      <h2>Reference Info</h2>
+      <label>reference_information_extracted_multiple:</label>
+      <textarea id="refInfoMultiple" rows="2" readonly style="width:100%;"></textarea>
+
+      <label>reference_strength_multiple:</label>
+      <textarea id="refStrengthMultiple" rows="2" readonly style="width:100%;"></textarea>
+    </div>
+
+    <!-- raw data -->
+    <div class="section">
+      <h2>Raw data</h2>
+      <textarea id="rawData" class="raw-data-area" readonly></textarea>
+    </div>
+
+    <script src="exifpopup.js"></script>
+  </body>
+</html>

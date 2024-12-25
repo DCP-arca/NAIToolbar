@@ -1,0 +1,28 @@
+<!-- popup/loadpreset.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Load Preset</title>
+    <link rel="stylesheet" href="presetstyles.css">
+</head>
+<body class="wildcard-body">
+    <h2>프리셋 불러오기</h2>
+    <label>
+        <span class="informtext">프리셋 선택:</span>
+        <select id="presetDropdown" class="dropdown">
+            <option value="">-- 프리셋을 선택하세요 --</option>
+        </select>
+    </label>
+    <label>
+        <span class="informtext">메인 프롬프트:</span>
+        <textarea id="mainPrompt" rows="4" readonly></textarea>
+    </label>
+    <div id="charPromptsContainer">
+        <!-- 캐릭터 프롬프트를 표시할 영역 -->
+    </div>
+    <button id="loadBtn" disabled>불러오기</button>
+
+    <script src="loadpreset.js"></script>
+</body>
+</html>

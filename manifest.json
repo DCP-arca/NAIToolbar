@@ -1,0 +1,38 @@
+{
+  "name": "NAIToolbar",
+  "version": "1.0",
+  "manifest_version": 3,
+  "description": "NAI 관련 기능을 제공하는 크롬 확장 프로그램입니다.",
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "scripting",
+    "storage",
+    "downloads",
+    "commands"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html"
+  },
+  "commands": {
+    "naitoolbar_openexif": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+E",
+        "mac": "Command+Shift+E"
+      },
+      "description": "이미지 정보 확인"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://novelai.net/image*"],
+      "js": ["content.js"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "host_permissions": [
+    "*://novelai.net/*"
+  ]
+}

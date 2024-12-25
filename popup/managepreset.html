@@ -1,0 +1,53 @@
+<!-- popup/managepreset.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Presets</title>
+    <link rel="stylesheet" href="presetstyles.css">
+</head>
+<body class="wildcard-body">
+    <h2>프리셋 관리</h2>
+    <table id="presetsTable">
+        <thead>
+            <tr>
+                <th>프리셋 이름</th>
+                <th>메인 프롬프트</th>
+                <th>캐릭터 프롬프트</th>
+                <th>작업</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 프리셋 목록이 여기에 추가됩니다 -->
+        </tbody>
+    </table>
+    <div id="presetMainButtonContainer">
+        <button id="addPresetBtn">프리셋 추가</button>
+    </div>
+
+    <!-- Modal for Adding/Editing Preset -->
+    <div id="presetModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3 id="modalTitle">프리셋 추가</h3>
+            <label>
+                <span class="informtext">프리셋 이름:</span>
+                <input type="text" id="modalPresetName" placeholder="프리셋 이름을 입력하세요">
+            </label>
+            <label>
+                <span class="informtext">메인 프롬프트:</span>
+                <textarea id="modalMainPrompt" rows="4"></textarea>
+            </label>
+            <div id="modalCharPromptsContainer">
+                <!-- 캐릭터 프롬프트 동적 추가 -->
+            </div>
+            <div id="presetMainButtonContainer">
+                <button id="addCharPromptBtn">캐릭터 프롬프트 추가</button>
+                <button id="savePresetBtn">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="managepreset.js"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Wildcards</title>
+    <link rel="stylesheet" href="wildcardstyles.css">
+</head>
+<body class="wildcard-body">
+    <h2>와일드카드 관리</h2>
+    <div class="informtext">
+        <label>
+            <br><br>
+            미리 정해진 리스트에서 하나를 뽑아 적용합니다. <br>
+            프롬프트에서 __와일드카드이름__ 으로 적용됩니다.<br>
+            <br>
+        </label>
+    <div>
+    <table id="wildcardTable">
+        <thead>
+            <tr>
+                <th>키</th>
+	            <th>값</th>
+	            <th>수정</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 와일드카드 목록이 여기에 추가됩니다 -->
+        </tbody>
+    </table>
+    <button id="addWildcard">새 와일드 카드 작성</button>
+    <button id="importWildcards">txt 파일(들)로 불러오기</button>
+
+    <!-- 추가/수정 모달 -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3 id="modalTitle">새 와일드 카드 작성</h3>
+            <label for="wildcardKey">키:</label>
+            <input type="text" id="wildcardKey" />
+            <text for="wildcardValue">값:</label>
+			<textarea id="wildcardValue" rows="5"></textarea>
+            <button id="saveWildcard">저장</button>
+        </div>
+    </div>
+
+    <script src="wildcard.js"></script>
+</body>
+</html>

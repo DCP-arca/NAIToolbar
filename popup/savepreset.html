@@ -1,0 +1,26 @@
+<!-- popup/savepreset.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Save Preset</title>
+    <link rel="stylesheet" href="presetstyles.css">
+</head>
+<body class="wildcard-body">
+    <h2>프리셋 저장</h2>
+    <label>
+        <span class="informtext">프리셋 이름:</span>
+        <input type="text" id="presetName" placeholder="프리셋 이름을 입력하세요">
+    </label>
+    <label>
+        <span class="informtext">메인 프롬프트:</span>
+        <textarea id="mainPrompt" rows="4" readonly></textarea>
+    </label>
+    <div id="charPromptsContainer">
+        <!-- 캐릭터 프롬프트를 표시할 영역 -->
+    </div>
+    <button id="saveBtn">저장</button>
+
+    <script src="savepreset.js"></script>
+</body>
+</html>
