@@ -48,6 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
   autoSaveCheckbox.addEventListener('change', () => {
       chrome.storage.sync.set({ autoSaveEnabled: autoSaveCheckbox.checked });
   });
+  intervalInput.addEventListener('change', () => {
+      chrome.storage.sync.set({ intervalTime: intervalInput.value })
+  });
 
   /////// 프리셋
   const savePresetBtn = document.getElementById('savePresetBtn');
