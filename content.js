@@ -373,10 +373,6 @@ function downloadImage() {
       action: 'downloadImage',
       imageUrl: imageElement.src,
       promString : getNodeByXPath(xPathMainprompt).value.slice(0, 20)
-    }, (response) => {
-      if (!response | !response.success) {
-        console.error('이미지 다운로드 실패:', response.error);
-      }
     });
   }
 }
