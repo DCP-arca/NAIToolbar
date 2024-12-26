@@ -148,7 +148,7 @@ function swapText(){
                 const xPathCharTextarea = `//*[@id="__next"]/div[2]/div[4]/div[1]/div[3]/div[2]/div/div[4]/div[${n}]/div[3]/div[1]/textarea`;
                 const textareaChar = getNodeByXPath(xPathCharTextarea);
                 if (textareaChar) {
-                    targetTextareaArr.push([textareaChar, textareaMainprom.value])
+                    targetTextareaArr.push([textareaChar, textareaChar.value])
                     n++;
                 }
                 else{
