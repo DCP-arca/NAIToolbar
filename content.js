@@ -22,6 +22,16 @@ function getNodeByXPath(xPath) {
   return result.singleNodeValue;
 }
 
+function tryFindCharTextarea(n) {
+    let textareaChar = getNodeByXPath(`//*[@id="__next"]/div[2]/div[4]/div[1]/div[3]/div[2]/div/div[4]/div[${n}]/div[3]/div[1]/textarea`);
+
+    if (!textareaChar){
+        textareaChar = getNodeByXPath(`//*[@id="__next"]/div[2]/div[4]/div[1]/div[3]/div[2]/div/div[6]/div[${n}]/div[3]/div[1]/textarea`)
+    }
+
+    return textareaChar
+}
+
 /**
  * applyTemplatedText 함수
  * @param {string} originalText - 원본 텍스트
@@ -145,8 +155,7 @@ function swapText(){
         if (document.documentElement.innerHTML.includes("NAI Diffusion V4")) {
             let n = 3; 
             while (true) {
-                const xPathCharTextarea = `//*[@id="__next"]/div[2]/div[4]/div[1]/div[3]/div[2]/div/div[4]/div[${n}]/div[3]/div[1]/textarea`;
-                const textareaChar = getNodeByXPath(xPathCharTextarea);
+                const textareaChar = tryFindCharTextarea(n)
                 if (textareaChar) {
                     targetTextareaArr.push([textareaChar, textareaChar.value])
                     n++;
@@ -209,8 +218,7 @@ function getAllPrompt()
     if (document.documentElement.innerHTML.includes("NAI Diffusion V4")) {
         let n = 3; 
         while (true) {
-            const xPathCharTextarea = `//*[@id="__next"]/div[2]/div[4]/div[1]/div[3]/div[2]/div/div[4]/div[${n}]/div[3]/div[1]/textarea`;
-            const textareaChar = getNodeByXPath(xPathCharTextarea);
+            const textareaChar = tryFindCharTextarea(n)
             if (textareaChar) {
                 charPromptStrList.push(textareaChar.value)
                 n++;
@@ -241,8 +249,7 @@ function insertPrompt(mainPromptStr, charPromptStrList)
     if (document.documentElement.innerHTML.includes("NAI Diffusion V4")) {
         let n = 3; 
         while (true) {
-            const xPathCharTextarea = `//*[@id="__next"]/div[2]/div[4]/div[1]/div[3]/div[2]/div/div[4]/div[${n}]/div[3]/div[1]/textarea`;
-            const textareaChar = getNodeByXPath(xPathCharTextarea);
+            const textareaChar = tryFindCharTextarea(n)
             if (textareaChar) {
                 textareaChar.value = charPromptStrList[n-3];
                 textareaChar.dispatchEvent(new Event('input', { bubbles: true }));
