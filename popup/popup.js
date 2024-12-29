@@ -105,10 +105,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   ///////////// 오토 세이브
 
-  // const autoSaveCheckbox = document.getElementById('autoSaveCheckbox');
-  // autoSaveCheckbox.addEventListener('change', () => {
-  //     chrome.storage.sync.set({ autoSaveEnabled: autoSaveCheckbox.checked });
-  // });
+  const autoSaveCheckbox = document.getElementById('autoSaveCheckbox');
+  autoSaveCheckbox.addEventListener('change', () => {
+      chrome.storage.sync.set({ autoSaveEnabled: autoSaveCheckbox.checked });
+  });
 
   ///////////// 상태 업데이트
   function setMyButtonDisabled(isDisabled) {
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const isAutoClickEnabled = result.autoClickEnabled || false;
     const intervalTime = result.intervalTime || 3;
     const gcount = result.gcount || "";
-    // const isAutoSaveEnabled = result.autoSaveEnabled || false;
+    const isAutoSaveEnabled = result.autoSaveEnabled || false;
 
     //novel ai check
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 입력 필드 및 체크박스 상태 업데이트
     intervalInput.value = intervalTime;
     gcountInput.value = gcount;
-    // autoSaveCheckbox.checked = isAutoSaveEnabled;
+    autoSaveCheckbox.checked = isAutoSaveEnabled;
   });
 
   chrome.storage.sync.get(['willApplyWildcard', 'willApplyRandom'], (data) => {

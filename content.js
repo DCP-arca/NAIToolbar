@@ -307,12 +307,12 @@ function tryOneClickGenerate() {
                 downloadIntervalId = null;
 
                 // 다운로드
-                // chrome.storage.sync.get(['autoSaveEnabled'], (latest) => {
-                //     const stillAutoSaveEnabled = latest.autoSaveEnabled || false;
-                //     if (stillAutoSaveEnabled) {
-                //       downloadImage();
-                //     }
-                // });
+                chrome.storage.sync.get(['autoSaveEnabled'], (latest) => {
+                    const stillAutoSaveEnabled = latest.autoSaveEnabled || false;
+                    if (stillAutoSaveEnabled) {
+                      downloadImage();
+                    }
+                });
             }
         }, 250); // 0.25초마다 체크
     }
@@ -337,12 +337,12 @@ function startAutoClick() {
             // 이전 상태는 disabled=true였고, 현재는 false로 변경되었을 때
             if (lastDisabled === true && currentDisabled === false) {
                 // 다운로드
-                // chrome.storage.sync.get(['autoSaveEnabled'], (latest) => {
-                //     const stillAutoSaveEnabled = latest.autoSaveEnabled || false;
-                //     if (stillAutoSaveEnabled) {
-                //       downloadImage();
-                //     }
-                // });
+                chrome.storage.sync.get(['autoSaveEnabled'], (latest) => {
+                    const stillAutoSaveEnabled = latest.autoSaveEnabled || false;
+                    if (stillAutoSaveEnabled) {
+                      downloadImage();
+                    }
+                });
 
                 if (gcount)
                 {
