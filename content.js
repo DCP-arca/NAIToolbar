@@ -307,12 +307,12 @@ function tryOneClickGenerate() {
                 downloadIntervalId = null;
 
                 // 다운로드
-                chrome.storage.sync.get(['autoSaveEnabled'], (latest) => {
-                    const stillAutoSaveEnabled = latest.autoSaveEnabled || false;
-                    if (stillAutoSaveEnabled) {
-                      downloadImage();
-                    }
-                });
+                // chrome.storage.sync.get(['autoSaveEnabled'], (latest) => {
+                //     const stillAutoSaveEnabled = latest.autoSaveEnabled || false;
+                //     if (stillAutoSaveEnabled) {
+                //       downloadImage();
+                //     }
+                // });
             }
         }, 250); // 0.25초마다 체크
     }
@@ -326,21 +326,36 @@ function startAutoClick() {
 
     // 자동 생성은 맨처음 클릭 이후에도 계속 생성해줌    
     let lastDisabled = naiGenerateButton.disabled;
-    chrome.storage.sync.get(['intervalTime'], (latest) => {
+    chrome.storage.sync.get(['intervalTime', 'gcount'], (latest) => {
         const intervalTime = latest.intervalTime || 3;
+        const gcount = latest.gcount || "";
 
+        let nowCount = 1;
         autoClickIntervalId = setInterval(() => {
             const currentDisabled = naiGenerateButton.disabled;
 
             // 이전 상태는 disabled=true였고, 현재는 false로 변경되었을 때
             if (lastDisabled === true && currentDisabled === false) {
                 // 다운로드
-                chrome.storage.sync.get(['autoSaveEnabled'], (latest) => {
-                    const stillAutoSaveEnabled = latest.autoSaveEnabled || false;
-                    if (stillAutoSaveEnabled) {
-                      downloadImage();
+                // chrome.storage.sync.get(['autoSaveEnabled'], (latest) => {
+                //     const stillAutoSaveEnabled = latest.autoSaveEnabled || false;
+                //     if (stillAutoSaveEnabled) {
+                //       downloadImage();
+                //     }
+                // });
+
+                if (gcount)
+                {
+                    if (gcount <= nowCount){
+                        stopAutoClick()
+                        chrome.runtime.sendMessage({ action: "onGcountEnd"});
+                                
+                        return;
                     }
-                });
+                    else{
+                        nowCount++
+                    }
+                }
 
                 // 시간 초 기다려서 재시작
                 autoClickTimeoutId = setTimeout(() => {

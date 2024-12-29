@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggleBtn = document.getElementById('toggleBtn');
   const oneClickGenerateBtn = document.getElementById('oneClickGenerateBtn');
   const intervalInput = document.getElementById('intervalInput');
-  const autoSaveCheckbox = document.getElementById('autoSaveCheckbox');
+  const gcountInput = document.getElementById('gcountInput')
   const openExifPopupButton = document.getElementById('openExifPopupButton');
 
   function updateButtonStates(isActive) {
@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
       toggleBtn.classList.toggle('active', isActive);
       oneClickGenerateBtn.style.opacity = isActive ? '0.5' : '1';
       intervalInput.disabled = isActive
+      gcountInput.disabled = isActive
   }
   
   // 1회 생성 버튼 동작
@@ -43,13 +44,11 @@ document.addEventListener('DOMContentLoaded', () => {
           chrome.runtime.sendMessage({ action: 'cancelAutoClick' });
       }
   });
-
-  //autoSaveCheckbox
-  autoSaveCheckbox.addEventListener('change', () => {
-      chrome.storage.sync.set({ autoSaveEnabled: autoSaveCheckbox.checked });
-  });
   intervalInput.addEventListener('change', () => {
       chrome.storage.sync.set({ intervalTime: intervalInput.value })
+  });
+  gcountInput.addEventListener('change', () => {
+      chrome.storage.sync.set({ gcount: gcountInput.value })
   });
 
   /////// 프리셋
@@ -104,6 +103,12 @@ document.addEventListener('DOMContentLoaded', () => {
         );
       }
   });
+  ///////////// 오토 세이브
+
+  // const autoSaveCheckbox = document.getElementById('autoSaveCheckbox');
+  // autoSaveCheckbox.addEventListener('change', () => {
+  //     chrome.storage.sync.set({ autoSaveEnabled: autoSaveCheckbox.checked });
+  // });
 
   ///////////// 상태 업데이트
   function setMyButtonDisabled(isDisabled) {
@@ -115,10 +120,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   setMyButtonDisabled(true)
-  chrome.storage.sync.get(['autoClickEnabled', 'intervalTime', 'autoSaveEnabled'], (result) => {
+  chrome.storage.sync.get(['autoClickEnabled', 'intervalTime', 'gcount', 'autoSaveEnabled'], (result) => {
     const isAutoClickEnabled = result.autoClickEnabled || false;
     const intervalTime = result.intervalTime || 3;
-    const isAutoSaveEnabled = result.autoSaveEnabled || false;
+    const gcount = result.gcount || "";
+    // const isAutoSaveEnabled = result.autoSaveEnabled || false;
 
     //novel ai check
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -134,11 +140,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 입력 필드 및 체크박스 상태 업데이트
     intervalInput.value = intervalTime;
-    autoSaveCheckbox.checked = isAutoSaveEnabled;
+    gcountInput.value = gcount;
+    // autoSaveCheckbox.checked = isAutoSaveEnabled;
   });
 
   chrome.storage.sync.get(['willApplyWildcard', 'willApplyRandom'], (data) => {
       applyWildcardCheckbox.checked = data.willApplyWildcard || false;
       applyRandomCheckbox.checked = data.willApplyRandom || false;
+  });
+  
+  chrome.runtime.onMessage.addListener((message, sender) => {
+    if (message.action === "onGcountEnd") {
+      updateButtonStates(false)
+    }
   });
 });
