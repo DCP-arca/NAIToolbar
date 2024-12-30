@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 와일드카드 목록 불러오기
     function loadWildcards() {
-    chrome.storage.sync.get(['wildcardTable'], (data) => {
+    chrome.storage.local.get(['wildcardTable'], (data) => {
         const wildcardTable = data.wildcardTable || {};
         wildcardTableBody.innerHTML = ''; // 기존 내용 초기화
 
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        chrome.storage.sync.get(['wildcardTable'], (data) => {
+        chrome.storage.local.get(['wildcardTable'], (data) => {
             const wildcardTable = data.wildcardTable || {};
 
             // 이미 존재하는 키인지 확인
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 새 키-값 추가
             wildcardTable[key] = value;
 
-            chrome.storage.sync.set({ wildcardTable }, () => {
+            chrome.storage.local.set({ wildcardTable }, () => {
                 loadWildcards();
                 closeModal();
             });
@@ -121,10 +121,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // 와일드카드 삭제
     function deleteWildcard(key) {
         if (confirm(`정말로 와일드카드 "${key}"(을)를 삭제하시겠습니까?`)) {
-            chrome.storage.sync.get(['wildcardTable'], (data) => {
+            chrome.storage.local.get(['wildcardTable'], (data) => {
                 const wildcardTable = data.wildcardTable || {};
                 delete wildcardTable[key];
-                chrome.storage.sync.set({ wildcardTable }, () => {
+                chrome.storage.local.set({ wildcardTable }, () => {
                     loadWildcards();
                 });
             });
@@ -156,10 +156,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     processedFiles++;
                     if (processedFiles === files.length) {
-                        chrome.storage.sync.get(['wildcardTable'], (data) => {
+                        chrome.storage.local.get(['wildcardTable'], (data) => {
                             const wildcardTable = data.wildcardTable || {};
                             Object.assign(wildcardTable, newWD);
-                            chrome.storage.sync.set({ wildcardTable }, () => {
+                            chrome.storage.local.set({ wildcardTable }, () => {
                                 loadWildcards();
                             });
                         });
