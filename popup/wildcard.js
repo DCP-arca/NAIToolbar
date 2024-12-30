@@ -186,6 +186,16 @@ document.addEventListener('DOMContentLoaded', () => {
         openModal('새 와일드 카드 작성');
     });
 
-    // 초기 로드
-    loadWildcards();
+    // 초기 로드 : sync 버그 수정
+    chrome.storage.sync.get(['wildcardTable'], (data) => {
+        if (data.wildcardTable) {
+            chrome.storage.local.set({ wildcardTable: data.wildcardTable }, () => {
+                chrome.storage.sync.remove(['wildcardTable']);
+                loadWildcards();
+            });
+        }
+        else{
+            loadWildcards();
+        }
+    });
 });
