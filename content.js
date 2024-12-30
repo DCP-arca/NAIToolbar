@@ -344,7 +344,7 @@ function startAutoClick() {
                     }
                 });
 
-                if (gcount)
+                if (gcount && gcount > 0)
                 {
                     if (gcount <= nowCount){
                         stopAutoClick()
