@@ -330,6 +330,8 @@ function startAutoClick() {
         const intervalTime = latest.intervalTime || 3;
         const gcount = latest.gcount || "";
 
+        stopAutoClick()
+
         let nowCount = 1;
         autoClickIntervalId = setInterval(() => {
             const currentDisabled = naiGenerateButton.disabled;

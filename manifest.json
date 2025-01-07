@@ -1,6 +1,6 @@
 {
   "name": "NAIToolbar",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "manifest_version": 3,
   "description": "NAI 관련 기능을 제공하는 크롬 확장 프로그램입니다.",
   "permissions": [
