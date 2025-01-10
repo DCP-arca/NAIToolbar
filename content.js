@@ -5,7 +5,7 @@
 /////////////////////////////////////////////////
 
 const btnXPath = '//*[@id="__next"]/div[2]/div[4]/div[1]/div[5]/button';
-const xPathMainprompt = '//*[@id="__next"]/div[2]/div[4]/div[1]/div[3]/div[2]/div/div[2]/textarea';
+const xPathMainprompt = '//*[@id="__next"]/div[2]/div[4]/div[1]/div[3]/div[2]/div/div[2]/div[1]/div/div/p';
 const imageXpath = '//*[@id="__next"]/div[2]/div[4]/div[2]/div[2]/div[2]/div/div/img';
 const imageXpathWhenGenerating = '//*[@id="__next"]/div[2]/div[4]/div[2]/div[2]/div[3]/div/div/img';
 const TIME_SWAPBACK_MS = 10
@@ -23,10 +23,10 @@ function getNodeByXPath(xPath) {
 }
 
 function tryFindCharTextarea(n) {
-    let textareaChar = getNodeByXPath(`//*[@id="__next"]/div[2]/div[4]/div[1]/div[3]/div[2]/div/div[4]/div[${n}]/div[3]/div[1]/textarea`);
+    let textareaChar = getNodeByXPath(`//*[@id="__next"]/div[2]/div[4]/div[1]/div[3]/div[2]/div/div[4]/div[${n}]/div[3]/div[1]/div[1]/div/div/p`);
 
     if (!textareaChar){
-        textareaChar = getNodeByXPath(`//*[@id="__next"]/div[2]/div[4]/div[1]/div[3]/div[2]/div/div[6]/div[${n}]/div[3]/div[1]/textarea`)
+        textareaChar = getNodeByXPath(`//*[@id="__next"]/div[2]/div[4]/div[1]/div[3]/div[2]/div/div[4]/div[${n}]/div[3]/div[1]/div[1]/div/div/p`)
     }
 
     return textareaChar
@@ -148,7 +148,7 @@ function swapText(){
         // 메인 프롬프트 바꾸기
         const textareaMainprom = getNodeByXPath(xPathMainprompt);
         if (textareaMainprom) {
-            targetTextareaArr.push([textareaMainprom, textareaMainprom.value])
+            targetTextareaArr.push([textareaMainprom, textareaMainprom.textContent])
         }
 
         // v4의 경우 캐릭터별 텍스트 체크해서 바꾸기
@@ -157,7 +157,7 @@ function swapText(){
             while (true) {
                 const textareaChar = tryFindCharTextarea(n)
                 if (textareaChar) {
-                    targetTextareaArr.push([textareaChar, textareaChar.value])
+                    targetTextareaArr.push([textareaChar, textareaChar.textContent])
                     n++;
                 }
                 else{
@@ -176,7 +176,7 @@ function swapText(){
 
             // 새 값으로 변경
             const newValue = applyTemplatedText(originalValue, wildcardTable, willApplyWildcard, willApplyRandom);
-            textarea.value = newValue;
+            textarea.textContent = newValue;
             // React 등으로 인해 state 갱신 유도를 위해 input 이벤트도 날려줌
             textarea.dispatchEvent(new Event('input', { bubbles: true }));
         }
@@ -192,7 +192,7 @@ function restoreText(targetTextareaArr) {
             const textarea = textareaInfo[0]
             const originalValue = textareaInfo[1]
             
-            textarea.value = originalValue;
+            textarea.textContent = originalValue;
             textarea.dispatchEvent(new Event('input', { bubbles: true }));
         }
     }, TIME_SWAPBACK_MS);
@@ -211,7 +211,7 @@ function getAllPrompt()
     let charPromptStrList = []
     const textareaMainprom = getNodeByXPath(xPathMainprompt);
     if (textareaMainprom) {
-        mainPromptStr = textareaMainprom.value
+        mainPromptStr = textareaMainprom.textContent
     }
 
     // v4의 경우 캐릭터별 텍스트 체크해서 바꾸기
@@ -220,7 +220,7 @@ function getAllPrompt()
         while (true) {
             const textareaChar = tryFindCharTextarea(n)
             if (textareaChar) {
-                charPromptStrList.push(textareaChar.value)
+                charPromptStrList.push(textareaChar.textContent)
                 n++;
             }
             else{
@@ -241,7 +241,7 @@ function insertPrompt(mainPromptStr, charPromptStrList)
     // 메인 프롬프트 바꾸기
     const textareaMainprom = getNodeByXPath(xPathMainprompt);
     if (textareaMainprom) {
-        textareaMainprom.value = mainPromptStr;
+        textareaMainprom.textContent = mainPromptStr;
         textareaMainprom.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
@@ -251,7 +251,7 @@ function insertPrompt(mainPromptStr, charPromptStrList)
         while (true) {
             const textareaChar = tryFindCharTextarea(n)
             if (textareaChar) {
-                textareaChar.value = charPromptStrList[n-3];
+                textareaChar.textContent = charPromptStrList[n-3];
                 textareaChar.dispatchEvent(new Event('input', { bubbles: true }));
                 n++;
                 if (charPromptStrList.length < n-2)
@@ -279,6 +279,8 @@ function insertPrompt(mainPromptStr, charPromptStrList)
 /////////////////////////////////////////////////
 
 let naiGenerateButton = null
+let autoClickIntervalId = null
+let autoClickTimeoutId = null
 
 /*******************************************************
  * 2) 핵심 행동 함수
@@ -287,11 +289,13 @@ let naiGenerateButton = null
 async function generate() {
     const targetTextareaArr = await swapText()
 
-    naiGenerateButton.click();
+    setTimeout(()=>{
+        naiGenerateButton.click();
 
-    if (targetTextareaArr.length !== 0){
-        restoreText(targetTextareaArr)
-    }
+        if (targetTextareaArr.length !== 0){
+                restoreText(targetTextareaArr)
+        }
+    },50)
 }
 
 // 1회 생성 로직
@@ -375,7 +379,6 @@ function startAutoClick() {
         }, 250); // 0.25초마다 체크}
     });
 }
-
 // 자동 생성 취소
 function stopAutoClick() {
     if (autoClickIntervalId) {
@@ -396,7 +399,7 @@ function downloadImage() {
     chrome.runtime.sendMessage({
       action: 'downloadImage',
       imageUrl: imageElement.src,
-      promString : getNodeByXPath(xPathMainprompt).value.slice(0, 20)
+      promString : getNodeByXPath(xPathMainprompt).textContent.slice(0, 20)
     });
   }
 }
