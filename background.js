@@ -14,7 +14,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const milliseconds = String(now.getMilliseconds()).charAt(0); // M (첫 번째 숫자만 사용)
 
     // 파일 이름 포맷: YYMMDD_HHMMSSM_myimg.png
-    const filename = `${year}${month}${day}_${hours}${minutes}${seconds}${milliseconds}_${request.promString}.png`;
+    let filename = `${year}${month}${day}_${hours}${minutes}${seconds}${milliseconds}_${request.promString}.png`;
+    filename = filename.replace(/[<>:"/\\|?*]/g, '');
 
     // 다운로드 옵션 설정
     const downloadOptions = {
