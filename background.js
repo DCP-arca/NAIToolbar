@@ -1,5 +1,23 @@
 // background.js
 
+// content script 메시지 전송 및 주입 함수
+function sendMessageToTabWithInjection(tabId, request, callback) {
+  chrome.tabs.sendMessage(tabId, request, (response) => {
+    if (chrome.runtime.lastError) {
+      // content script가 없으니 수동으로 주입 시도.
+      chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        files: ['content.js']
+      }, () => {
+        // 주입 후 다시 메시지 전달.
+        chrome.tabs.sendMessage(tabId, request, callback);
+      });
+    } else {
+      callback(response);
+    }
+  });
+}
+
 // 메시지 리스너 설정
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'downloadImage' && request.imageUrl) {
@@ -39,7 +57,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   else if (request.action === 'generate' || request.action === 'getAllPrompt') {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0]?.id) {
-        chrome.tabs.sendMessage(tabs[0].id, request, sendResponse);
+        sendMessageToTabWithInjection(tabs[0].id, request, sendResponse);
       }
     });
   }
@@ -53,7 +71,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
   else if (request.action === 'insertPrompt') {
     if (lastTabWhenLoadpresetClicked){
-      chrome.tabs.sendMessage(lastTabWhenLoadpresetClicked, request, sendResponse);
+      sendMessageToTabWithInjection(lastTabWhenLoadpresetClicked, request, sendResponse);
     }
   }
 
@@ -107,7 +125,7 @@ function sendMessageToOpenExifPopup()
     if (tabs && tabs.length !== 0){
       const url = tabs[0].url;
       if (url && url.includes("novelai.net/image")) { 
-        chrome.tabs.sendMessage(tabs[0].id, { action: "getImgsrcForExifopen" }, (response) => {
+        sendMessageToTabWithInjection(tabs[0].id, { action: "getImgsrcForExifopen" }, (response) => {
           if (response && response.src) {
             openExifPopup(response.src);
           }

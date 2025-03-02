@@ -8,7 +8,8 @@
     "contextMenus",
     "storage",
     "downloads",
-    "commands"
+    "commands",
+    "scripting"
   ],
   "action": {
     "default_popup": "popup/popup.html"

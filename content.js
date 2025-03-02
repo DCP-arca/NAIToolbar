@@ -4,7 +4,7 @@
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 
-const btnXPath = '//*[@id="__next"]/div[2]/div[4]/div[1]/div[5]/button';
+const btnXPath = '//*[@id="__next"]/div[2]/div[4]/div[2]/div[1]/div[1]/div[5]/button';
 const xPathMainprompt = '//*[@id="__next"]/div[2]/div[4]/div[1]/div[3]/div[2]/div/div[2]/div[1]/div/div/p';
 const imageXpath = '//*[@id="__next"]/div[2]/div[4]/div[2]/div[2]/div[2]/div/div/img';
 const imageXpathWhenGenerating = '//*[@id="__next"]/div[2]/div[4]/div[2]/div[2]/div[3]/div/div/img';
@@ -278,7 +278,6 @@ function insertPrompt(mainPromptStr, charPromptStrList)
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 
-let naiGenerateButton = null
 let autoClickIntervalId = null
 let autoClickTimeoutId = null
 
@@ -290,93 +289,111 @@ async function generate() {
     const targetTextareaArr = await swapText()
 
     setTimeout(()=>{
-        naiGenerateButton.click();
+        naiGenerateButton().then((button) => {
+            button.click();
 
-        if (targetTextareaArr.length !== 0){
+            if (targetTextareaArr.length !== 0){
                 restoreText(targetTextareaArr)
-        }
+            }
+        });
     },50)
 }
 
 // 1회 생성 로직
 function tryOneClickGenerate() {
     //try라서 여러번 연타 될 수 있음.
-    if (!naiGenerateButton.disabled) {
-        generate()
+    naiGenerateButton().then((button) => {
+        if (!button.disabled) {
+            generate()
 
-        // 다운로드 로직
-        downloadIntervalId = setInterval(() => {
-            if (!naiGenerateButton.disabled) {
-                clearInterval(downloadIntervalId);
-                downloadIntervalId = null;
+            // 다운로드 로직
+            downloadIntervalId = setInterval(() => {
+                if (!button.disabled) {
+                    clearInterval(downloadIntervalId);
+                    downloadIntervalId = null;
 
-                // 다운로드
-                chrome.storage.sync.get(['autoSaveEnabled'], (latest) => {
-                    const stillAutoSaveEnabled = latest.autoSaveEnabled || false;
-                    if (stillAutoSaveEnabled) {
-                      downloadImage();
-                    }
-                });
-            }
-        }, 250); // 0.25초마다 체크
-    }
+                    // 다운로드
+                    chrome.storage.sync.get(['autoSaveEnabled'], (latest) => {
+                        const stillAutoSaveEnabled = latest.autoSaveEnabled || false;
+                        if (stillAutoSaveEnabled) {
+                          downloadImage();
+                        }
+                    });
+                }
+            }, 250); // 0.25초마다 체크
+        }
+    });
 }
 
 // 자동 생성 로직
 function startAutoClick() {
-    if (!naiGenerateButton.disabled) {
-        generate()
-    }
+    naiGenerateButton().then((button) => {
+        if (!button.disabled) {
+            generate()
+        }
 
-    // 자동 생성은 맨처음 클릭 이후에도 계속 생성해줌    
-    let lastDisabled = naiGenerateButton.disabled;
-    chrome.storage.sync.get(['intervalTime', 'gcount'], (latest) => {
-        const intervalTime = latest.intervalTime || 3;
-        const gcount = latest.gcount || "";
+        // 자동 생성은 맨처음 클릭 이후에도 계속 생성해줌    
+        let lastDisabled = button.disabled;
+        chrome.storage.sync.get(['intervalTime', 'gcount'], (latest) => {
+            const intervalTime = latest.intervalTime || 3;
+            const gcount = latest.gcount || "";
 
-        stopAutoClick()
+            stopAutoClick()
 
-        let nowCount = 1;
-        autoClickIntervalId = setInterval(() => {
-            const currentDisabled = naiGenerateButton.disabled;
+            let nowCount = 1;
+            autoClickIntervalId = setInterval(() => {
+                const currentDisabled = button.disabled;
 
-            // 이전 상태는 disabled=true였고, 현재는 false로 변경되었을 때
-            if (lastDisabled === true && currentDisabled === false) {
-                // 다운로드
-                chrome.storage.sync.get(['autoSaveEnabled'], (latest) => {
-                    const stillAutoSaveEnabled = latest.autoSaveEnabled || false;
-                    if (stillAutoSaveEnabled) {
-                      downloadImage();
-                    }
-                });
-
-                if (gcount && gcount > 0)
-                {
-                    if (gcount <= nowCount){
-                        stopAutoClick()
-                        chrome.runtime.sendMessage({ action: "onGcountEnd"});
-                                
+                // 이전 상태는 disabled=true였고, 현재는 false로 변경되었을 때
+                if (lastDisabled === true && currentDisabled === false) {
+                        try {
+                        // 다운로드
+                        chrome.storage.sync.get(['autoSaveEnabled'], (latest) => {
+                            const stillAutoSaveEnabled = latest.autoSaveEnabled || false;
+                            if (stillAutoSaveEnabled) {
+                              downloadImage();
+                            }
+                        });
+                        } catch (error) {
+                        console.error('autoSaveEnabled get error:', error);
+                        stopAutoClick();
                         return;
                     }
-                    else{
-                        nowCount++
+
+                    if (gcount && gcount > 0)
+                    {
+                        if (gcount <= nowCount){
+                            stopAutoClick()
+                            chrome.runtime.sendMessage({ action: "onGcountEnd"});
+                                    
+                            return;
+                        }
+                        else{
+                            nowCount++
+                        }
                     }
+
+                    // 시간 초 기다려서 재시작
+                    autoClickTimeoutId = setTimeout(() => {
+                        // 그 사이에 버튼이 또 비활성화 되었는지, 설정이 변경되지 않았는지 확인
+                        try {
+                            chrome.storage.sync.get(['autoClickEnabled'], (latest) => {
+                                const stillAutoClickEnabled = latest.autoClickEnabled || false;
+                                if (stillAutoClickEnabled && !button.disabled) {
+                                  generate();
+                                }
+                            });
+                        } catch (error) {
+                            console.error('autoSaveEnabled get error:', error);
+                            stopAutoClick();
+                            return;
+                        }
+                    }, intervalTime * 1000);
                 }
 
-                // 시간 초 기다려서 재시작
-                autoClickTimeoutId = setTimeout(() => {
-                    // 그 사이에 버튼이 또 비활성화 되었는지, 설정이 변경되지 않았는지 확인
-                    chrome.storage.sync.get(['autoClickEnabled'], (latest) => {
-                        const stillAutoClickEnabled = latest.autoClickEnabled || false;
-                        if (stillAutoClickEnabled && !naiGenerateButton.disabled) {
-                          generate();
-                        }
-                    });
-                }, intervalTime * 1000);
-            }
-
-            lastDisabled = currentDisabled;
-        }, 250); // 0.25초마다 체크}
+                lastDisabled = currentDisabled;
+            }, 250); // 0.25초마다 체크}
+        });
     });
 }
 // 자동 생성 취소
@@ -446,17 +463,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
  * 4) 버튼 찾기
  *******************************************************/
 
-function waitForButton(targetXpath, onFound) {
-  const pollInterval = 100; // 0.1초
-  const pollId = setInterval(() => {
-    const button = getNodeByXPath(targetXpath);
+function naiGenerateButton() {
+  return new Promise((resolve) => {
+    const button = getNodeByXPath(btnXPath);
     if (button) {
-      clearInterval(pollId);
-      onFound(button);
+      return resolve(button);
     }
-  }, pollInterval);
+    const pollInterval = 10; // 0.1초마다 확인
+    const intervalId = setInterval(() => {
+      const button = getNodeByXPath(btnXPath);
+      if (button) {
+        clearInterval(intervalId);
+        resolve(button);
+      }
+    }, pollInterval);
+  });
 }
 
-waitForButton(btnXPath, (button) => {
-  naiGenerateButton = button
+window.addEventListener('beforeunload', () => {
+  stopAutoClick();
 });
