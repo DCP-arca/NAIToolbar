@@ -135,7 +135,8 @@ function checkUndesireContent() {
 
 function findGenerateButton(){
     try{
-        return getNodeByXPath(findElementXPathByRegex("Generate . Image"));
+        let spanElement = getNodeByXPath(findElementXPathByRegex("Generate . Image"));
+        return spanElement ? spanElement.closest("button") : null;
     }catch (error) {
         return null
     }
@@ -536,7 +537,7 @@ function startAutoClick() {
 
             // 이전 상태는 disabled=true였고, 현재는 false로 변경되었을 때
             if (lastDisabled === true && currentDisabled === false) {
-                    try {
+                try {
                     // 다운로드
                     chrome.storage.sync.get(['autoSaveEnabled'], (latest) => {
                         const stillAutoSaveEnabled = latest.autoSaveEnabled || false;
@@ -544,9 +545,8 @@ function startAutoClick() {
                           downloadImage();
                         }
                     });
-                    } catch (error) {
+                } catch (error) {
                     console.error('autoSaveEnabled get error:', error);
-                    stopAutoClick();
                     return;
                 }
 
@@ -653,10 +653,6 @@ let nodeRefreshIntervalId = setInterval(() => {
 window.addEventListener('beforeunload', () => {
     stopAutoClick();
 
-    if (autoClickIntervalId) {
-        clearInterval(autoClickIntervalId);
-        autoClickIntervalId = null;
-    }
     if (nodeRefreshIntervalId){
         clearInterval(nodeRefreshIntervalId);
         nodeRefreshIntervalId = null;
