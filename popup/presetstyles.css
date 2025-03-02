@@ -85,6 +85,13 @@ td {
     word-break: break-word;
 }
 
+#presetsTable td.value {
+  max-width: 200px; /* 원하는 최대 너비 */
+  white-space: nowrap; /* 한 줄로 표시 */
+  overflow: hidden; /* 넘치는 부분 감추기 */
+  text-overflow: ellipsis; /* 넘칠 경우 ... 표시 */
+}
+
 table td.key {
     width: 20%; /* Key 열 너비 */
     font-weight: bold;

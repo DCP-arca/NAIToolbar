@@ -145,16 +145,16 @@ function findGenerateButton(){
 function findPromptArea()
 {
     try{
-        const xpaths = findAllElementXpathByQuery("div[contenteditable]").map(item => getNodeByXPath(item + "/p"))
+        const xpaths = findAllElementXpathByQuery("div[contenteditable]").map(item => getNodeByXPath(item))
 
         if (xpaths.length < 2)
-            return ["CantFindPromptArea", null, null]
+            return null
 
         const firstHalf = xpaths.slice(0, Math.floor(xpaths.length / 2));
 
-        return ["Okay", xpaths[0], xpaths.length < 4 ? null : firstHalf.slice(1)]
+        return firstHalf
     }catch (error) {
-        return ["Error", null, null]
+        return null
     }
 }
 
@@ -172,13 +172,10 @@ function getNode(nodeName)
 {
     chrome.storage.local.set({ undesireContentState: checkUndesireContent() });
 
-    if (nodeName == "promt_main" || nodeName == "promt_char"){
+    if (nodeName == "promt"){
         const promtAreaArr = findPromptArea();
-        if (nodeName == "promt_main" && promtAreaArr[1]){
-            return promtAreaArr[1]
-        }
-        if (nodeName == "promt_char" && promtAreaArr[2]){
-            return promtAreaArr[2]
+        if (promtAreaArr){
+            return promtAreaArr
         }
     }
     if (nodeName == "button"){
@@ -208,6 +205,55 @@ function getNode(nodeName)
 /////////        text-swap        ///////////////
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
+
+
+//
+//'<p>asd</p><p><br class="ProseMirror-trailingBreak"></p><p>bsdv</p><p>asc</p><p><br class="ProseMirror-trailingBreak"></p><p>asxsa</p><p>zxc</p>'
+// ->
+//'asd\n\nbsdv\nasc\n\nasxsa\nzxc'
+//로 변환.
+//
+// innerHTML -> plainText 변환 함수
+function htmlToPlainText(html) {
+  // 임시 컨테이너를 만들어서 HTML 문자열을 파싱한다
+  const container = document.createElement('div');
+  container.innerHTML = html;
+  
+  // 모든 <p> 요소를 선택하고, 각각의 텍스트 콘텐츠를 배열에 담는다
+  const paragraphs = container.querySelectorAll('p');
+  const lines = Array.from(paragraphs).map(p => p.textContent);
+  
+  // 배열을 줄바꿈(\n)으로 합쳐 plainText를 반환한다
+  return lines.join('\n');
+}
+
+function escapeHTML(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// plainText -> innerHTML 변환 함수
+function plainTextToHTML(text) {
+  // plainText를 \n 기준으로 분리한다
+  const lines = text.split('\n');
+  let html = '';
+  
+  // 각 줄에 대해 처리한다
+  lines.forEach(line => {
+    // 빈 문자열이면, 즉 연속된 \n 중 두번째부터는 trailing break로 처리한다
+    if (line === '') {
+      html += '<p><br class="ProseMirror-trailingBreak"></p>';
+    } else {
+      html += '<p>' + escapeHTML(line) + '</p>';
+    }
+  });
+  
+  return html;
+}
 
 /**
  * applyTemplatedText 함수
@@ -321,57 +367,58 @@ function waitForNextFrame() {
 }
 
 //MAIN FUNCTION
+//result = [
+//    [textarea, textarea.innerHTML], ...
+//]
 function swapText(){
     return new Promise(async (resolve) => {
-        const targetTextareaArr = []
+        const result = []
 
         // 스토리지에서 설정값 가져오기
         const { willApplyWildcard = false, willApplyRandom = false } = await getFromStorage(['willApplyWildcard', 'willApplyRandom']);
         const {wildcardTable = {}} = await getFromStorageLocal(['wildcardTable'])
         // 둘 다 false면 대체하지 않음
         if (!willApplyWildcard && !willApplyRandom) {
-            resolve(targetTextareaArr);
+            resolve(result);
             return;
         }
 
-        // 메인 프롬프트 바꾸기
-        const textareaMainprom = getNode("promt_main");
-        if (textareaMainprom) {
-            targetTextareaArr.push([textareaMainprom, textareaMainprom.textContent])
+        // 프롬 가져오기
+        const textareaArr = getNode("promt");
+        if (!textareaArr){
+            resolve(result)
+            return
         }
 
-        // v4의 경우 캐릭터별 텍스트 체크해서 바꾸기
+        // 메인 프롬
+        result.push([textareaArr[0], textareaArr[0].innerHTML])
+
+        // 캐릭 프롬(v4의 경우)
         if (document.documentElement.innerHTML.includes("NAI Diffusion V4")) {
-            let n = 0; 
-            while (true) {
-                const textareaCharArr = getNode("promt_char")
-                if (!textareaCharArr) {break}
-
-                const textareaChar = textareaCharArr[n];
-                if (!textareaChar) {break}
-                targetTextareaArr.push([textareaChar, textareaChar.textContent])
-                n++;
-
-                if (n > 50){
-                    console.warn("n이 너무 커서 루프를 종료합니다.");
-                    break;
-                }
+            for (var i = 1; i < textareaArr.length; i++) {
+                result.push([textareaArr[i], textareaArr[i].innerHTML])
             }
         }
 
-        for (const textareaInfo of targetTextareaArr) {
+        //값 변경
+        for (const textareaInfo of result) {
             const textarea = textareaInfo[0]
             const originalValue = textareaInfo[1]
 
-            // 새 값으로 변경
-            const newValue = applyTemplatedText(originalValue, wildcardTable, willApplyWildcard, willApplyRandom);
-            textarea.textContent = newValue;
+            //HTML to Plain
+            const plainValue = htmlToPlainText(originalValue);
+            //Plain to Templated
+            const templatedValue = applyTemplatedText(plainValue, wildcardTable, willApplyWildcard, willApplyRandom);
+            //Templated to HTML
+            const newHTMLValue = plainTextToHTML(templatedValue)
+
+            textarea.innerHTML = newHTMLValue;
             // React 등으로 인해 state 갱신 유도를 위해 input 이벤트도 날려줌
             textarea.dispatchEvent(new Event('input', { bubbles: true }));
             await waitForNextFrame();
         }
 
-        resolve(targetTextareaArr)
+        resolve(result)
         return;
     });
 }
@@ -387,7 +434,7 @@ async function restoreText(targetTextareaArr) {
         const textarea = textareaInfo[0];
         const originalValue = textareaInfo[1];
 
-        textarea.textContent = originalValue;
+        textarea.innerHTML = originalValue;
         textarea.dispatchEvent(new Event('input', { bubbles: true }));
         await waitForNextFrame();
     }
@@ -404,26 +451,16 @@ function getAllPrompt()
 {
     let mainPromptStr = ""
     let charPromptStrList = []
-    const textareaMainprom = getNode("promt_main");
-    if (textareaMainprom) {
-        mainPromptStr = textareaMainprom.textContent
-    }
 
-    // v4의 경우 캐릭터별 텍스트 체크해서 바꾸기
-    if (document.documentElement.innerHTML.includes("NAI Diffusion V4")) {
-        let n = 0; 
-        while (true) {
-            const textareaCharArr = getNode("promt_char")
-            if (!textareaCharArr) {break}
+    const textareaArr = getNode("promt");
+    if (textareaArr&&textareaArr.length>0){
+        // 메인프롬
+        mainPromptStr = htmlToPlainText(textareaArr[0].innerHTML)
 
-            const textareaChar = textareaCharArr[n]
-            if (!textareaChar) {break}
-            charPromptStrList.push(textareaChar.textContent)
-            n++;
-
-            if (n > 50){
-                console.warn("n이 너무 커서 루프를 종료합니다.");
-                break;
+        // 캐릭프롬 (v4의 경우)
+        if (document.documentElement.innerHTML.includes("NAI Diffusion V4")) {
+            for (var i = 1; i < textareaArr.length; i++) {
+                charPromptStrList.push(htmlToPlainText(textareaArr[i].innerHTML))
             }
         }
     }
@@ -433,34 +470,21 @@ function getAllPrompt()
 
 function insertPrompt(mainPromptStr, charPromptStrList)
 {
-    // 메인 프롬프트 바꾸기
-    const textareaMainprom = getNode("promt_main");
-    if (textareaMainprom) {
-        textareaMainprom.textContent = mainPromptStr;
-        textareaMainprom.dispatchEvent(new Event('input', { bubbles: true }));
-    }
+    const textareaArr = getNode("promt");
+    if (textareaArr&&textareaArr.length>0){
+        // 메인프롬
+        console.log(mainPromptStr)
+        console.log(plainTextToHTML(mainPromptStr))
+        textareaArr[0].innerHTML = plainTextToHTML(mainPromptStr)
+        textareaArr[0].dispatchEvent(new Event('input', { bubbles: true }));
 
-    // v4의 경우 캐릭터별 텍스트 체크해서 바꾸기
-    if (document.documentElement.innerHTML.includes("NAI Diffusion V4")) {
-        let n = 0; 
-        while (true) {
-            const textareaCharArr = getNode("promt_char")
-            if (!textareaCharArr) { break }
-
-            const textareaChar = textareaCharArr[n]
-            if (!textareaChar) { break }
-
-            textareaChar.textContent = charPromptStrList[n];
-            textareaChar.dispatchEvent(new Event('input', { bubbles: true }));
-            n++;
-            if (charPromptStrList.length < n + 1)
-            {
-                break;
-            }
-
-            if (n > 50){
-                console.warn("n이 너무 커서 루프를 종료합니다.");
-                break;
+        // 캐릭프롬 (v4의 경우)
+        if (document.documentElement.innerHTML.includes("NAI Diffusion V4")) {
+            for (var i = 1; i < textareaArr.length; i++) {
+                if (charPromptStrList.length < i)
+                    break;
+                textareaArr[i].innerHTML = plainTextToHTML(charPromptStrList[i-1]);
+                textareaArr[i].dispatchEvent(new Event('input', { bubbles: true }));
             }
         }
     }
@@ -600,13 +624,13 @@ function stopAutoClick() {
 // 이미지 다운로드 함수
 function downloadImage() {
     const image = getNode("image")
-    const prompt_main = getNode("promt_main");
-    if (image && image.src && prompt_main) {
+    const prompt = getNode("promt");
+    if (image && image.src && prompt && prompt.length > 0) {
     // 백그라운드로 이미지 다운로드 요청
         chrome.runtime.sendMessage({
             action: 'downloadImage',
             imageUrl: image.src,
-            promString : prompt_main.textContent.slice(0, 20)
+            promString : htmlToPlainText(prompt[0].innerHTML).slice(0, 20)
         });
     }
 }
