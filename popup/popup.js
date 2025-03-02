@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const intervalInput = document.getElementById('intervalInput');
   const gcountInput = document.getElementById('gcountInput')
   const openExifPopupButton = document.getElementById('openExifPopupButton');
+  const textElementWarn = document.getElementById('setting_text_element_warn');
 
   function updateButtonStates(isActive) {
       toggleBtn.textContent = isActive ? '자동 생성 취소' : '자동 생성 시작';
@@ -154,4 +155,17 @@ document.addEventListener('DOMContentLoaded', () => {
       updateButtonStates(false)
     }
   });
+
+  function updateElementWarnText() {
+    chrome.storage.local.get(["undesireContentState"], (data) => {
+      if (chrome.runtime.lastError) {
+        console.error("Storage error:", chrome.runtime.lastError);
+      }
+      else{
+        textElementWarn.textContent = data.undesireContentState || "";
+      }
+    });
+  }
+  setInterval(updateElementWarnText, 300);
+  updateElementWarnText();
 });

@@ -189,3 +189,9 @@ chrome.commands.onCommand.addListener((command) => {
     sendMessageToOpenExifPopup()
   }
 });
+
+chrome.runtime.onStartup.addListener(() => {
+    chrome.storage.local.remove("undesireContentState", () => {
+        console.log("브라우저 재시작 → 세션 데이터 삭제됨!");
+    });
+});
