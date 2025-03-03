@@ -167,7 +167,6 @@ function findImageArea()
     }
 }
 
-let generateButton = null
 function getNode(nodeName)
 {
     chrome.storage.local.set({ undesireContentState: checkUndesireContent() });
@@ -179,15 +178,10 @@ function getNode(nodeName)
         }
     }
     if (nodeName == "button"){
-        if (!generateButton){
-            const button = findGenerateButton();
-            if (button){
-                generateButton = button
-                return button
-            }
-        }
-        else{
-            return generateButton
+        const button = findGenerateButton();
+        if (button){
+            generateButton = button
+            return button
         }
     }
     if (nodeName == "image"){
@@ -428,8 +422,6 @@ function delay(ms) {
 }
 
 async function restoreText(targetTextareaArr) {
-    await delay(TIME_SWAPBACK_MS);
-
     for (const textareaInfo of targetTextareaArr) {
         const textarea = textareaInfo[0];
         const originalValue = textareaInfo[1];
@@ -513,6 +505,7 @@ async function generate() {
     getNode("button").click();
 
     if (targetTextareaArr.length !== 0){
+        await delay(TIME_SWAPBACK_MS);
         await restoreText(targetTextareaArr)
     }
 }
@@ -671,7 +664,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 let nodeRefreshIntervalId = setInterval(() => {
-    chrome.storage.local.set({ undesireContentState: checkUndesireContent() });
+    try {
+        chrome.storage.local.set({ undesireContentState: checkUndesireContent() });
+    } catch (err) {
+        if (nodeRefreshIntervalId){
+            clearInterval(nodeRefreshIntervalId);
+            nodeRefreshIntervalId = null;
+        }
+    }
 }, TIME_FINDING_NODE_MS);
 
 window.addEventListener('beforeunload', () => {
